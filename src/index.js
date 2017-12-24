@@ -1,11 +1,12 @@
 const setup = require('./starter-kit/setup');
 const request = require('request');
 const fs = require('fs');
-const {WebClient} = require('@slack/client');
-const web = new WebClient( process.env.SLACK_TOKEN );
 
 exports.handler = async (event, context, callback) => {
   // For keeping the browser launch
+  const { WebClient } = require('@slack/client');
+  const web = new WebClient( process.env.SLACK_TOKEN );
+
   context.callbackWaitsForEmptyEventLoop = false;
 
   const body = JSON.parse(event.body);
@@ -14,11 +15,10 @@ exports.handler = async (event, context, callback) => {
 
   const browser = await setup.getBrowser();
 
-  console.log('got browser');
-
   const channel = body.event.channel;
 
   const url = body.event.links[0].url;
+  const ts = body.event.message_ts;
 
   const page = await browser.newPage();
 
@@ -45,20 +45,37 @@ exports.handler = async (event, context, callback) => {
     {
       path: '/tmp/temp.jpeg',
       type: 'jpeg',
-      quality: 50,
+      quality: 50
     }
   );
-  
+
+  await browser.close();
+
   console.log('********Preparing to Upload Screenshot********');
     
   web.files.upload('ss_bot.jpeg', {
         file: fs.createReadStream(`/tmp/temp.jpeg`),
-        channels: [ channel ],
         text: ' ',
+        channels: [ "C8K0U8ZUJ" ]
   })
   .then( ( res ) => {
     console.log('********Screenshot Uploaded********');
-    callback(null, { statusCode: 200 } );
+    return res;
+  })
+  .then( ( res ) => {
+    console.log('response from upload', res);
+    // res.url_private
+    const unfurls = {
+        [url]: {
+            title: 'Marcel Please!',
+            image_url: res.file.url_private,
+            color: '#764FA5',
+        },
+    };
+    return web.chat.unfurl(ts, channel, unfurls);
+  })
+  .then( ( res ) => {
+    callback(null, { statusCode: 200, body: {}, data: {} } );
   })
   .catch( ( err ) => {
         console.log(err);
