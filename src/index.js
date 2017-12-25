@@ -11,7 +11,7 @@ exports.handler = async (event, context, callback) => {
 
   const body = JSON.parse(event.body);
 
-  console.log('********The initial information from slack: ', event.body, '********');
+  console.log('********The initial information from slack: ', event.body, event, '********');
 
   const browser = await setup.getBrowser();
 
