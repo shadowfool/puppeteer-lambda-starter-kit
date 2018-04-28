@@ -12,17 +12,18 @@ exports.handler = async (event, context, callback) => {
   const body = JSON.parse(event.body);
 
   console.log('********The initial information from slack: ', event.body, event, '********');
-
   const browser = await setup.getBrowser();
 
   const channel = body.event.channel;
 
   const url = body.event.links[0].url;
+  console.log('URL:', url)
+
   const ts = body.event.message_ts;
 
   const page = await browser.newPage();
 
-  await page.goto(url);
+  await page.goto(process.env.LOGIN_URL);
 
   console.log('********Redirected to login********');
   await page.evaluate( (username, password) => {
@@ -33,15 +34,16 @@ exports.handler = async (event, context, callback) => {
    }, process.env.USERNAME, process.env.PASSWORD);
 
   console.log('********Creds Inserted and Accepted********');
-  
-  await page.waitForNavigation({
-    waitUntil: 'networkidle',
-    networkIdleTimeout: 500
-  });
+
+  const page2 = await browser.newPage()
+
+  await page2.goto(url);
+
+  console.log('past the url');
 
   console.log('********Preparing to Take Screenshot********');
   
-  await page.screenshot(
+  await page2.screenshot(
     {
       path: '/tmp/temp.jpeg',
       type: 'jpeg',

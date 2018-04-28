@@ -2,6 +2,9 @@ const index = require('../index');
 const config = require('./config');
 const puppeteer = require('puppeteer');
 
+const nodeEnv = require('dotenv');
+nodeEnv.config();
+
 (async () => {
     const browser = await puppeteer.launch({
         headless: false,
