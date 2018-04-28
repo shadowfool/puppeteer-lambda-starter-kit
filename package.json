@@ -8,10 +8,12 @@
     "package-prepare": "npm run babel && cp -r package.json dist && cd dist && PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 npm install --production",
     "babel": "rm -rf dist && mkdir dist && ./node_modules/.bin/babel src --out-dir dist",
     "local": "npm run babel && cp -r node_modules dist && node dist/starter-kit/local.js",
-    "lint": "./node_modules/.bin/eslint src"
+    "lint": "./node_modules/.bin/eslint src",
+    "test": "rm -rf test-dist && mkdir test-dist && babel test --out-dir test-dist && cp -r node_modules test-dist && node test-dist/index.js"
   },
   "dependencies": {
     "@slack/client": "^3.15.0",
+    "dotenv": "^5.0.1",
     "puppeteer": "^0.10.2",
     "request": "^2.83.0",
     "tar": "^4.0.1"
