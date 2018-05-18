@@ -16,7 +16,7 @@ exports.handler = async (event, context, callback) => {
 
   const channel = body.event.channel;
 
-  const url = body.event.links[0].url;
+  const url = decodeURI(body.event.links[0].url);
   console.log('URL:', url)
 
   const ts = body.event.message_ts;
