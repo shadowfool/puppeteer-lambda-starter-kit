@@ -42,6 +42,11 @@ exports.handler = async (event, context, callback) => {
 
   await page2.goto( url );
 
+  await page2.waitForNavigation({
+    waitUntil: 'networkidle',
+    networkIdleTimeout: 500
+  });
+
   console.log('past the url');
 
   console.log('********Preparing to Take Screenshot********');
