@@ -1,6 +1,7 @@
 const setup = require('./starter-kit/setup');
 const request = require('request');
 const fs = require('fs');
+const unescape = require('lodash.unescape');
 
 exports.handler = async (event, context, callback) => {
   // For keeping the browser launch
@@ -16,8 +17,10 @@ exports.handler = async (event, context, callback) => {
 
   const channel = body.event.channel;
 
-  const url = body.event.links[0].url;
-  console.log('URL:', url)
+  let preTransformUrl = body.event.links[0].url;
+  console.log('url pre transform ', preTransformUrl);
+  let url =  unescape( preTransformUrl );
+  console.log('url post transform ', url);
 
   const ts = body.event.message_ts;
 
@@ -37,7 +40,12 @@ exports.handler = async (event, context, callback) => {
 
   const page2 = await browser.newPage()
 
-  await page2.goto(url);
+  await page2.goto( url );
+
+  await page2.waitForNavigation({
+    waitUntil: 'networkidle',
+    networkIdleTimeout: 500
+  });
 
   console.log('past the url');
 
@@ -54,7 +62,7 @@ exports.handler = async (event, context, callback) => {
   await browser.close();
 
   console.log('********Preparing to Upload Screenshot********');
-    
+ 
   web.files.upload('ss_bot.jpeg', {
         file: fs.createReadStream(`/tmp/temp.jpeg`),
         text: ' ',
@@ -68,7 +76,7 @@ exports.handler = async (event, context, callback) => {
     console.log('response from upload', res);
     // res.url_private
     const unfurls = {
-        [url]: {
+        [preTransformUrl]: {
             title: 'Marcel Please!',
             image_url: res.file.url_private,
             color: '#764FA5',
