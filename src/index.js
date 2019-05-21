@@ -1,16 +1,20 @@
 const setup = require('./starter-kit/setup');
-const request = require('request');
 const fs = require('fs');
 const unescape = require('lodash.unescape');
+const otherListeners = require('./otherListeners.js')
 
 exports.handler = async (event, context, callback) => {
   // For keeping the browser launch
-  const { WebClient } = require('@slack/client');
-  const web = new WebClient( process.env.SLACK_TOKEN );
-
   context.callbackWaitsForEmptyEventLoop = false;
 
   const body = JSON.parse(event.body);
+  
+  if ( body.event.type === 'member_left_channel' || body.event.type === 'team_join') {
+    return otherListeners( body, callback );
+  }
+
+  const {WebClient} = require('@slack/client');
+  const web = new WebClient( process.env.SLACK_TOKEN );
 
   console.log('********The initial information from slack: ', event.body, event, '********');
   const browser = await setup.getBrowser();
@@ -19,7 +23,7 @@ exports.handler = async (event, context, callback) => {
 
   let preTransformUrl = body.event.links[0].url;
   console.log('url pre transform ', preTransformUrl);
-  let url =  unescape( preTransformUrl );
+  let url = unescape( preTransformUrl );
   console.log('url post transform ', url);
 
   const ts = body.event.message_ts;
@@ -38,13 +42,13 @@ exports.handler = async (event, context, callback) => {
 
   console.log('********Creds Inserted and Accepted********');
 
-  const page2 = await browser.newPage()
+  const page2 = await browser.newPage();
 
   await page2.goto( url );
 
   await page2.waitForNavigation({
     waitUntil: 'networkidle',
-    networkIdleTimeout: 500
+    networkIdleTimeout: 500,
   });
 
   console.log('past the url');
@@ -55,7 +59,7 @@ exports.handler = async (event, context, callback) => {
     {
       path: '/tmp/temp.jpeg',
       type: 'jpeg',
-      quality: 50
+      quality: 50,
     }
   );
 
@@ -66,7 +70,7 @@ exports.handler = async (event, context, callback) => {
   web.files.upload('ss_bot.jpeg', {
         file: fs.createReadStream(`/tmp/temp.jpeg`),
         text: ' ',
-        channels: [ "C8K0U8ZUJ" ]
+        channels: ['C8K0U8ZUJ']
   })
   .then( ( res ) => {
     console.log('********Screenshot Uploaded********');

@@ -16,7 +16,6 @@
     "dotenv": "^5.0.1",
     "lodash.unescape": "^4.0.1",
     "puppeteer": "^0.10.2",
-    "request": "^2.83.0",
     "tar": "^4.0.1"
   },
   "devDependencies": {
